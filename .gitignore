@@ -1,0 +1,14 @@
+.tfvars
+
+.tfstate
+*.tfstate
+*.tfstate.*
+.terraform
+
+output.txt
+
+.secrets
+.secret
+*.secret
+
+.logs

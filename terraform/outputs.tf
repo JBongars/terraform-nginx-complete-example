@@ -1,3 +1,4 @@
-output "nginx-ami" {
-  value = data.aws_ami.nginx_ami.id
+output "nginx" {
+  description = "nginx configuration"
+  value       = module.nginx
 }

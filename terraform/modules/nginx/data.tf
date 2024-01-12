@@ -23,8 +23,8 @@ data "aws_ami" "nginx_ami" {
   owners      = ["self"]
 
   filter {
-    name   = "ami"
-    values = ["nginx-base-${var.environment}*"]
+    name   = "name"
+    values = ["nginx-base-${var.environment}-*"]
   }
 
   filter {

@@ -59,8 +59,7 @@ module "ec2_instance" {
   key_name               = aws_key_pair.key_pair.key_name
   vpc_security_group_ids = [aws_security_group.allow_nginx.id]
 
-  # ami = data.aws_ami.nginx_ami.id
-  ami = "ami-0f690bd9eba4ec13e"
+  ami = data.aws_ami.nginx_ami.id
 
   monitoring                  = true
   associate_public_ip_address = true

@@ -4,6 +4,12 @@ variable "region" {
   default     = "ap-southeast-1"
 }
 
+variable "environment" {
+  description = "Environment"
+  type        = string
+  default     = "dev"
+}
+
 variable "project_name" {
   description = "Project name"
   type        = string

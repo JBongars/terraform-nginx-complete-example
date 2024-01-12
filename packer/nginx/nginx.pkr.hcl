@@ -16,7 +16,7 @@ source "amazon-ebs" "nginx-base" {
   }
 
   tags = {
-    Name = "nginx-base"
+    Name = "nginx-base-${var.environment}-${formatdate("YYYYMMDDHHmmss", timestamp())}"
     Environment = var.environment
     Owner = "Packer"
     BaseAMI = "Amazon Linux 2"

@@ -19,4 +19,4 @@ docker run -it \
     -v $HOME/.git-credentials:/root/.git-credentials \
     -v $HOME/.terraform.d:/root/.terraform.d \
     -v $HOME/.aws:/root/.aws \
-    --rm dtools_aws:latest /bin/sh -c 'apk add openssh openssl gettext && dos2unix /work/scripts/* && fish'
+    --rm dtools_aws:latest /bin/sh -c 'apk add openssh openssl gettext && fish'

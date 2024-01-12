@@ -1,17 +1,21 @@
-.tfvars
-
-.tfstate
+# Ignore Terraform state files
 *.tfstate
 *.tfstate.*
 .terraform
 
+.tfvars
+!*.tpl
+
+# Ignore output logs
 output.txt
 
+# Ignore secret files
 .secrets
 .secret
 *.secret
 
-# provider.tf shows my account id so remove from config as this is just a demo
+# Exclude specific Terraform configuration
 terraform/provider.tf
 
+# Ignore log files
 .logs

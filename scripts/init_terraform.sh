@@ -21,7 +21,7 @@ fi
     cd "$terraform_dir/setup"
     
     if ! [ -f ./.tfvars/test.tfvars ]; then
-        cp ./.tfvars/test.tfvars.tpl ./.tfvars/test.tfvars
+        cp ./.tfvars/test.tfvars.tpl ./test.tfvars
     fi
 
     terraform init 
@@ -33,7 +33,7 @@ fi
     cd "$terraform_dir"
 
     if ! [ -f ./.tfvars/test.tfvars ]; then
-        cp ./.tfvars/test.tfvars.tpl ./.tfvars/test.tfvars
+        cp ./.tfvars/test.tfvars.tpl ./test.tfvars
     fi
 
     if ! [ -f ./provider.tf ]; then

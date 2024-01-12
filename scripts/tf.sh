@@ -23,7 +23,7 @@ fi
 if [ ! -f "$var_file" ]; then
     echo "Terraform variable file not found: $var_file"
     echo "Create one by copying the example file:"
-    echo "cp $terraform_dir/.tfvars/example.tfvars.tpl $var_file"
+    echo "cp $terraform_dir/example.tfvars.tpl $var_file"
 fi
 
 # check if var file exist and if it should be used

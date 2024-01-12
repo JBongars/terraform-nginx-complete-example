@@ -19,9 +19,13 @@ fi
 # init setup backend for terraform
 (
     cd "$terraform_dir/setup"
+
+    if [ ! -d ./.tfvars ]; then
+        mkdir ./.tfvars
+    fi
     
-    if ! [ -f ./.tfvars/test.tfvars ]; then
-        cp ./test.tfvars.tpl ./.tfvars/test.tfvars
+    if [ ! -f ./.tfvars/test.tfvars ]; then
+        cp ./example.tfvars.tpl ./.tfvars/test.tfvars
     fi
 
     terraform init 
@@ -29,18 +33,21 @@ fi
 
     export BUCKET_NAME=$(terraform output bucket_name)
     export DYNAMODB_NAME=$(terraform output dynamodb_name)
+    export AWS_REGION=$(terraform output aws_region)
 
     cd "$terraform_dir"
 
-    if ! [ -f ./.tfvars/test.tfvars ]; then
-        cp ./test.tfvars.tpl ./.tfvars/test.tfvars
+    if [ ! -d ./.tfvars ]; then
+        mkdir ./.tfvars
     fi
 
-    if ! [ -f ./provider.tf ]; then
-        echo "BUCKET_NAME: $BUCKET_NAME"
-        echo "DYNAMODB_NAME: $DYNAMODB_NAME"
-
-        envsubst < provider.tf.tpl > provider.tf
+    if [ ! -f ./.tfvars/test.tfvars ]; then
+        cp ./example.tfvars.tpl ./.tfvars/test.tfvars
     fi
+
+    echo "BUCKET_NAME: $BUCKET_NAME"
+    echo "DYNAMODB_NAME: $DYNAMODB_NAME"
+
+    envsubst < provider.tf.tpl > provider.tf
 )
 

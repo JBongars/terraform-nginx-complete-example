@@ -24,7 +24,7 @@ data "aws_ami" "nginx_ami" {
 
   filter {
     name   = "name"
-    values = ["nginx-base-${var.environment}-*"]
+    values = ["*nginx-base-${var.environment}-*"]
   }
 
   filter {

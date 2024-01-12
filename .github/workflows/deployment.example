@@ -1,0 +1,156 @@
+name: Deployment
+
+on:
+  # workflow_dispatch:
+  # repository_dispatch:
+  #   types: [sync]
+
+env:
+  STAGE: test
+  TF_VERSION: 1.5.2
+  PACKER_VERSION: 1.10.0
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  packer-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: Deployer
+          aws-region: ap-southeast-1
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v1
+        with:
+          packer_version: ${{ env.PACKER_VERSION }}
+
+      - name: Packer Validate
+        run: packer validate .
+        working-directory: packer/nginx
+
+  terraform-validation:
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: Deployer
+          aws-region: ap-southeast-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+ 
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+      
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform
+
+      - name: Terraform Fmt Check
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+
+  terraform-plan:
+    runs-on: ubuntu-latest
+    needs: [ terraform-validation ]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: Deployer
+          aws-region: ap-southeast-1
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+ 
+      - name: Terraform Plan
+        run: |
+          ./scripts/tf.sh ${{ env.STAGE}} plan -no-color \
+            | grep -vE '^\[command\]|::debug::' \
+            | tee ./plan_summary.txt 
+            
+      - name: Commend PR with plan summary
+        id: plan_summary
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          PR_NUMBER=$(echo $GITHUB_REF | cut -d'/' -f 3)
+          PLAN_SUMMARY_BODY="Plan Summary (${{ matrix.project }}-${{ matrix.environment }}):"$'\n\n'"\`\`\`bash\n$(cat ./terraform/plan_summary.txt)\n\`\`\`"
+          
+          gh pr comment $PR_NUMBER --body "$PLAN_SUMMARY_BODY" || echo "PR not found or already merged. Skipping..."
+
+  build_ami:
+    needs: [ terraform-plan, packer-validation ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: Deployer
+          aws-region: ap-southeast-1
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v1
+        with:
+          packer_version: ${{ env.PACKER_VERSION }}
+
+      - name: Packer Build
+        run: ./build_ami.sh
+        working-directory: .
+
+  deploy: 
+    needs: [ build_ami, terraform-plan, terraform-validation ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: Deployer
+          aws-region: ap-southeast-1
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Terraform Apply
+        run: ./scripts/tf.sh ${{ env.STAGE }} apply -auto-approve
+        working-directory: .
+

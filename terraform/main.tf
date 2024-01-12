@@ -13,6 +13,7 @@ module "nginx" {
 
   nginx_config_path = var.nginx_config.nginx_config_path
   key_file          = var.nginx_config.key_file
+  ssl_cert_path     = var.nginx_config.ssl_cert_path
 
   tags = local.tags
 }

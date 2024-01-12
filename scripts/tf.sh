@@ -12,6 +12,7 @@ command=$2
 args=${@:3}
 
 enable_var_file=true # enabled by default
+enable_init=true # enabled by default
 var_file="$terraform_dir/.tfvars/$environment.tfvars"
 
 if [ ! -d "$terraform_dir" ]; then
@@ -34,12 +35,22 @@ else
     args=$(echo "$args -var-file $var_file")
 fi
 
+if [[ "$args" == *"-no-init"* ]]; then
+    enable_init=false
+    args=$(echo "$args" | sed 's/-no-init//g')
+else 
+    enable_init=true
+fi
+
 (
     export TF_WORKSPACE="$environment"
-
     cd "$terraform_dir"
-    echo "Running command: $_terraform $command $args"
     
-    $_terraform init
+    if [ "$enable_init" = true ]; then
+        echo "Initializing terraform"
+        $_terraform init
+    fi
+
+    echo "Running command: $_terraform $command $args"
     $_terraform $command $args
 )

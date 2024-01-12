@@ -74,6 +74,7 @@ resource "null_resource" "nginx_configuration" {
   triggers = {
     instance_id    = module.ec2_instance.arn
     nginx_conf_sha = filesha256(var.nginx_config_path)
+    ssl_cert_sha   = filesha256("${var.ssl_cert_path}.crt")
   }
 
   provisioner "file" {
@@ -81,9 +82,21 @@ resource "null_resource" "nginx_configuration" {
     destination = "/tmp/updated-nginx.conf"
   }
 
+  provisioner "file" {
+    source      = "${var.ssl_cert_path}.crt"
+    destination = "/tmp/ssl.crt"
+  }
+
+  provisioner "file" {
+    source      = "${var.ssl_cert_path}.key"
+    destination = "/tmp/ssl.key"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sudo mv /tmp/updated-nginx.conf /etc/nginx/nginx.conf",
+      "sudo mv /tmp/ssl.crt /etc/nginx/ssl.crt",
+      "sudo mv /tmp/ssl.key /etc/nginx/ssl.key",
       "sudo systemctl restart nginx"
     ]
   }

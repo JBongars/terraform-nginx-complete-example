@@ -38,5 +38,6 @@ variable "nginx_config" {
     instance_ami          = optional(string, null)
     nginx_config_path     = string
     key_file              = optional(string, null)
+    ssl_cert_path         = optional(string, null)
   })
 }

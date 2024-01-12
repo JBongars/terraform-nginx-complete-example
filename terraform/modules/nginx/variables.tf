@@ -38,6 +38,11 @@ variable "nginx_config_path" {
   type        = string
 }
 
+variable "ssl_cert_path" {
+  description = "ssl cert path"
+  type        = string
+}
+
 variable "key_file" {
   description = "key file"
   type        = string

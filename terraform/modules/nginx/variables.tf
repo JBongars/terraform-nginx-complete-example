@@ -36,7 +36,6 @@ variable "subnet_id" {
 variable "nginx_config_path" {
   description = "nginx config path"
   type        = string
-  default     = "nginx.conf"
 }
 
 variable "key_file" {

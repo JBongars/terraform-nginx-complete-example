@@ -59,11 +59,39 @@ module "ec2_instance" {
   key_name               = aws_key_pair.key_pair.key_name
   vpc_security_group_ids = [aws_security_group.allow_nginx.id]
 
+  # ami = data.aws_ami.nginx_ami.id
+  ami = "ami-0f690bd9eba4ec13e"
+
   monitoring                  = true
   associate_public_ip_address = true
 
   subnet_id = var.subnet_id
 
-
   tags = var.tags
+}
+
+resource "null_resource" "nginx_configuration" {
+  triggers = {
+    instance_id    = module.ec2_instance.arn
+    nginx_conf_sha = filesha256(var.nginx_config_path)
+  }
+
+  provisioner "file" {
+    source      = var.nginx_config_path
+    destination = "/tmp/updated-nginx.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mv /tmp/updated-nginx.conf /etc/nginx/nginx.conf",
+      "sudo systemctl restart nginx"
+    ]
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ec2-user" # or the appropriate username for your AMI
+    private_key = file("${var.key_file}")
+    host        = module.ec2_instance.public_ip
+  }
 }

@@ -11,4 +11,7 @@ output.txt
 .secret
 *.secret
 
+# provider.tf shows my account id so remove from config as this is just a demo
+terraform/provider.tf
+
 .logs

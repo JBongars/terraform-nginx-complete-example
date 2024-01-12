@@ -15,10 +15,10 @@ terraform {
 
   # s3 remote backend
   backend "s3" {
-    bucket         = "terraform-remote-state-<YOUR_ACCOUNT_ID>"
+    bucket         = ${BUCKET_NAME}
     key            = "terraform.tfstate"
     region         = local.region
-    dynamodb_table = "terraform-remote-state-lock"
+    dynamodb_table = ${DYNAMODB_NAME}
     encrypt        = true
   }
 

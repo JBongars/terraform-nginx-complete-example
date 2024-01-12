@@ -40,5 +40,6 @@ fi
     cd "$terraform_dir"
     echo "Running command: $_terraform $command $args"
     
+    $_terraform init
     $_terraform $command $args
 )

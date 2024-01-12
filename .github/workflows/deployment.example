@@ -149,6 +149,16 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Copy secrets to Terraform directory
+        env:
+          NGINX_PRIVATE_KEY: ${{ secrets.NGINX_PRIVATE_KEY }}
+          NGINX_SSL_CERT: ${{ secrets.NGINX_SSL_CERT }}
+          NGINX_SSL_KEY: ${{ secrets.NGINX_SSL_KEY }}
+        run: |
+          "$NGINX_PRIVATE_KEY" > ./.secrets/nginx
+          "$NGINX_SSL_CERT" > ./.secrets/certs/amazonaws.com.crt
+          "$NGINX_SSL_KEY" > ./.secrets/certs/amazonaws.com.key
       
       - name: Terraform Apply
         run: ./scripts/tf.sh ${{ env.STAGE }} apply -auto-approve

@@ -14,6 +14,6 @@ output "dynamodb_arn" {
   value = aws_dynamodb_table.dynamodb_terraform_state_lock.arn
 }
 
-output "aws_reigon" {
+output "aws_region" {
   value = local.region
 }
